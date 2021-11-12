@@ -90,6 +90,17 @@
 		let aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
 		let frustumSize = 30;
 		let camera, camera2, camera3, camera4, camera5;
+		let nowmodelFile = "models/mmd/kizunaai/kizunaai.pmx";
+		const modelFiles = ["models/mmd/kizunaai/kizunaai.pmx",	"models/mmd/『天宮こころ(Kokoro Amamiya)』/『天宮こころ(Kokoro Amamiya)』.pmx", "models/mmd/るいのれ式物述有栖_配布用フォルダ/物述有栖.pmx", ];
+
+		function onProgress(xhr) {
+			if (xhr.lengthComputable) {
+				const percentComplete = xhr.loaded / xhr.total * 100;
+				console.log(Math.round(percentComplete, 2) + '% downloaded');
+			}
+		}
+
+		const loader = new MMDLoader();
 
 		Ammo().then(function (AmmoLib) {
 
@@ -165,6 +176,7 @@
 
 			window.addEventListener('resize', onWindowResize);
 			//鏡頭控制
+			document.addEventListener("keydown", onDocumentKeyDown, false);
 
 		}
 
@@ -207,6 +219,44 @@
 			camera5.updateProjectionMatrix();
 		}
 
+		//
+		function onDocumentKeyDown(event) {
+			let keycode = event.which;
+			switch (keycode) {
+			case 65:
+				prevModel();
+				break;
+			case 68:
+				nextModel();
+				break;
+			default:
+				break;
+			}
+		}
+
+		function loadModel(modelPath) {
+			loader.load(modelPath, function (object) {
+			mesh = object;
+			mesh.position.y = - 10;
+			scene.add(mesh);
+			}, onProgress, null);
+		}
+
+		function prevModel() {
+			scene.remove(mesh);
+			const modelIndex = modelFiles.indexOf(nowmodelFile);
+			const prevModelPath = modelIndex === 0 ? modelFiles[modelFiles.length - 1] : modelFiles[modelIndex - 1];
+			nowmodelFile = prevModelPath;
+			loadModel(prevModelPath);
+		}
+
+		function nextModel() {
+			scene.remove(mesh);
+			const modelIndex = modelFiles.indexOf(nowmodelFile);
+			const nextModelPath = modelIndex === (modelFiles.length - 1) ? modelFile : modelFiles[modelIndex + 1];
+			nowmodelFile = nextModelPath;
+			loadModel(nextModelPath);
+		}
 		//
 
 		function animate() {
